@@ -1,2 +1,153 @@
 # Analise-de-golpes
 Um código simples feito em Java, para analisar a mensagem ou link e determinar se ele é golpe ou não
+
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class AnalisadorGolpe {
+
+    private static final String[] PALAVRAS_SUSPEITAS = {
+            "parabéns", "você ganhou", "prêmio", "clique agora", "urgente",
+            "senha", "cpf", "dados", "pix", "taxa",
+            "conta bloqueada", "última chance", "minutos", "hoje"
+    };
+
+    private static final String[] PALAVRAS_FAMILIA = {
+            "filho", "pai", "mãe", "irma", "irmã",
+            "neto", "neta",  "vó", "vô", "amor"
+    };
+
+    private static final Pattern URL_PATTERN = Pattern.compile(
+            "https?://[\\w.-]+(?:\\.[a-z]{2,})+[\\w./?=&%-]*",
+            Pattern.CASE_INSENSITIVE);
+
+    public static void main(String[] args) {
+
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Digite a mensagem suspeita:");
+        String mensagem = scanner.nextLine();
+
+        analisarMensagemEContato(mensagem);
+
+        scanner.close();
+    }
+
+    public static void analisarMensagemEContato(String mensagem) {
+
+        String textoLower = mensagem.toLowerCase();
+        int pontuacao = 0;
+
+        System.out.println("\n--- Analisando Dados ---\n");
+
+        // Verifica palavras suspeitas
+        for (String palavra : PALAVRAS_SUSPEITAS) {
+            if (textoLower.contains(palavra)) {
+                pontuacao++;
+                System.out.println("Termo suspeito encontrado: " + palavra);
+            }
+        }
+
+        // Verifica links
+        Matcher matcher = URL_PATTERN.matcher(mensagem);
+
+        while (matcher.find()) {
+
+            String link = matcher.group().toLowerCase();
+
+            System.out.println("\nLink encontrado: " + link);
+
+            boolean ehSuspeito = false;
+
+            if (link.startsWith("http://")) {
+                System.out.println("-> Link sem HTTPS");
+                ehSuspeito = true;
+            }
+
+            long hifens = link.chars().filter(c -> c == '-').count();
+
+            if (hifens >= 2) {
+                System.out.println("-> Domínio com muitos hífens");
+                ehSuspeito = true;
+            }
+
+            if (link.matches(".*(itau|bradesco|nubank|caixa|santander).*")
+                    && !link.matches(".*(itau|bradesco|nubank|caixa|santander)\\.com\\.br.*")) {
+
+                System.out.println("-> Marca conhecida em domínio suspeito");
+                ehSuspeito = true;
+            }
+
+            if (ehSuspeito) {
+                pontuacao++;
+            }
+        }
+
+        Scanner sc = new Scanner(System.in);
+
+        // Verifica se menciona familiares
+        boolean encontrouFamilia = false;
+
+        for (String palavra : PALAVRAS_FAMILIA) {
+            if (textoLower.contains(palavra)) {
+                encontrouFamilia = true;
+                break;
+            }
+        }
+
+        if (encontrouFamilia) {
+
+            System.out.println("\nA mensagem menciona um familiar.");
+            System.out.println("Ligue para essa pessoa antes de responder.");
+
+            System.out.print("A mensagem é legítima? (sim/nao): ");
+            String resposta = sc.nextLine();
+
+            if (resposta.equalsIgnoreCase("nao")) {
+                System.out.println("\nResultado: ALTO RISCO DE GOLPE");
+                return;
+            }
+        }
+
+        System.out.println("\nPontuação total: " + pontuacao);
+
+        if (pontuacao >= 1 && pontuacao < 3) {
+
+            System.out.print("Você já teve contato com esse remetente? (sim/nao): ");
+            String resposta = sc.nextLine();
+
+            if (resposta.equalsIgnoreCase("sim")) {
+
+                System.out.println("Resultado: BAIXO RISCO DE GOLPE");
+
+            } else {
+
+                System.out.print("Você esperava essa mensagem? (sim/nao): ");
+                String resposta2 = sc.nextLine();
+
+                if (resposta2.equalsIgnoreCase("sim")) {
+                    System.out.println("Resultado: BAIXO RISCO DE GOLPE");
+                } else {
+                    System.out.println("Resultado: ALTO RISCO DE GOLPE");
+                }
+            }
+
+        } else {
+
+            System.out.println("Resultado: " + classificarRisco(pontuacao));
+
+        }
+    }
+
+    private static String classificarRisco(int pontuacao) {
+
+        if (pontuacao >= 3) {
+            return "ALTO RISCO DE GOLPE";
+        } else if (pontuacao >= 1) {
+            return "POSSÍVEL GOLPE";
+        } else {
+            return "BAIXO RISCO";
+        }
+    }
+}
