@@ -1,14 +1,22 @@
-import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+Um código simples em Java para analisar se a mensagem ou link é golpe ou não
+ 
+    
+    
+    
+    
+    
+    import java.util.Scanner;
+    import java.util.regex.Matcher;
+    import java.util.regex.Pattern;
 
-public class AnalisadorGolpe {
-
+    public class AnalisadorGolpe {
+         };
+      
     private static final String[] PALAVRAS_SUSPEITAS = {
             "parabéns", "você ganhou", "prêmio", "clique agora", "urgente",
             "senha", "cpf", "dados", "pix", "taxa",
             "conta bloqueada", "última chance", "minutos", "hoje"
-    };
+
 
     private static final String[] PALAVRAS_FAMILIA = {
             "filho", "pai", "mãe", "irma", "irmã",
