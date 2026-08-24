@@ -5,22 +5,23 @@ Um código simples em Java para analisar se a mensagem ou link é golpe ou não
     
     
     
-    import java.util.Scanner;
-    import java.util.regex.Matcher;
-    import java.util.regex.Pattern;
+  
+   
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-    public class AnalisadorGolpe {
-         };
-      
+public class AnalisadorGolpe {
+
     private static final String[] PALAVRAS_SUSPEITAS = {
             "parabéns", "você ganhou", "prêmio", "clique agora", "urgente",
             "senha", "cpf", "dados", "pix", "taxa",
             "conta bloqueada", "última chance", "minutos", "hoje"
-
+    };
 
     private static final String[] PALAVRAS_FAMILIA = {
             "filho", "pai", "mãe", "irma", "irmã",
-            "neto", "neta",  "vó", "vô", "amor"
+            "neto", "neta", "vó", "vô", "amor"
     };
 
     private static final Pattern URL_PATTERN = Pattern.compile(
@@ -34,19 +35,18 @@ Um código simples em Java para analisar se a mensagem ou link é golpe ou não
         System.out.println("Digite a mensagem suspeita:");
         String mensagem = scanner.nextLine();
 
-        analisarMensagemEContato(mensagem);
+        analisarMensagemEContato(mensagem, scanner);
 
         scanner.close();
     }
 
-    public static void analisarMensagemEContato(String mensagem) {
+    public static void analisarMensagemEContato(String mensagem, Scanner scanner) {
 
         String textoLower = mensagem.toLowerCase();
         int pontuacao = 0;
 
         System.out.println("\n--- Analisando Dados ---\n");
 
-        // Verifica palavras suspeitas
         for (String palavra : PALAVRAS_SUSPEITAS) {
             if (textoLower.contains(palavra)) {
                 pontuacao++;
@@ -54,7 +54,6 @@ Um código simples em Java para analisar se a mensagem ou link é golpe ou não
             }
         }
 
-        // Verifica links
         Matcher matcher = URL_PATTERN.matcher(mensagem);
 
         while (matcher.find()) {
@@ -89,9 +88,7 @@ Um código simples em Java para analisar se a mensagem ou link é golpe ou não
             }
         }
 
-        Scanner sc = new Scanner(System.in);
 
-        // Verifica se menciona familiares
         boolean encontrouFamilia = false;
 
         for (String palavra : PALAVRAS_FAMILIA) {
@@ -107,7 +104,7 @@ Um código simples em Java para analisar se a mensagem ou link é golpe ou não
             System.out.println("Ligue para essa pessoa antes de responder.");
 
             System.out.print("A mensagem é legítima? (sim/nao): ");
-            String resposta = sc.nextLine();
+            String resposta = scanner.nextLine();
 
             if (resposta.equalsIgnoreCase("nao")) {
                 System.out.println("\nResultado: ALTO RISCO DE GOLPE");
@@ -120,7 +117,7 @@ Um código simples em Java para analisar se a mensagem ou link é golpe ou não
         if (pontuacao >= 1 && pontuacao < 3) {
 
             System.out.print("Você já teve contato com esse remetente? (sim/nao): ");
-            String resposta = sc.nextLine();
+            String resposta = scanner.nextLine();
 
             if (resposta.equalsIgnoreCase("sim")) {
 
@@ -129,7 +126,7 @@ Um código simples em Java para analisar se a mensagem ou link é golpe ou não
             } else {
 
                 System.out.print("Você esperava essa mensagem? (sim/nao): ");
-                String resposta2 = sc.nextLine();
+                String resposta2 = scanner.nextLine();
 
                 if (resposta2.equalsIgnoreCase("sim")) {
                     System.out.println("Resultado: BAIXO RISCO DE GOLPE");
@@ -152,6 +149,10 @@ Um código simples em Java para analisar se a mensagem ou link é golpe ou não
         } else if (pontuacao >= 1) {
             return "POSSÍVEL GOLPE";
         } else {
+            return "BAIXO RISCO";
+        }
+    }
+}
             return "BAIXO RISCO";
         }
     }
